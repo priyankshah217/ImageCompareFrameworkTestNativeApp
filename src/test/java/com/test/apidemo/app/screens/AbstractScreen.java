@@ -29,17 +29,20 @@ public abstract class AbstractScreen {
 		}
 	}
 
-	public void grabScreenShot(String fileName) throws IOException, InterruptedException, IM4JavaException {
+	public void grabScreenShot(String fileName) throws IOException,
+			InterruptedException, IM4JavaException {
 		AppUtils.takeScreenShot("temp.png");
 		AppUtils.cropScreenShot("temp.png", fileName);
 	}
 
-	public boolean validateScreen(String actualImage, String expectedImage) throws FileNotFoundException {
+	public boolean validateScreen(String actualImage, String expectedImage)
+			throws FileNotFoundException {
 		// TODO Auto-generated method stub
 		return AppUtils.compareScreenShot(actualImage, expectedImage);
 	}
-	
-	public boolean compareScreenUsingMD5(String actualImage, String expectedImage) throws FileNotFoundException {
+
+	public boolean compareScreenUsingMD5(String actualImage,
+			String expectedImage) throws FileNotFoundException {
 		// TODO Auto-generated method stub
 		return AppUtils.compareMD5Hash(actualImage, expectedImage);
 	}

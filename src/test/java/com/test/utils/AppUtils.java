@@ -16,7 +16,7 @@ import org.im4java.core.CompareCmd;
 import org.im4java.core.ConvertCmd;
 import org.im4java.core.IM4JavaException;
 import org.im4java.core.IMOperation;
-import org.im4java.process.StandardStream;
+import org.im4java.process.ArrayListErrorConsumer;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.remote.DesiredCapabilities;
@@ -138,7 +138,8 @@ public class AppUtils {
 	public static boolean compareScreenShot(String actualImage,
 			String expectedImage) throws FileNotFoundException {
 		CompareCmd compare = new CompareCmd();
-		compare.setErrorConsumer(StandardStream.STDERR); // for // metric-output
+		ArrayListErrorConsumer errorConsumer = new ArrayListErrorConsumer();
+		compare.setErrorConsumer(errorConsumer); // for // metric-output
 		IMOperation cmpOp = new IMOperation();
 		cmpOp.addImage(ACTUAL_IMAGE_DIR + "/" + actualImage);
 		cmpOp.addImage(REFERENCE_IMAGE_DIR + "/" + expectedImage);
@@ -146,10 +147,9 @@ public class AppUtils {
 								// squared)
 		cmpOp.addImage();
 		try {
-			compare.run(cmpOp);
-			return true;
+			compare.run(cmpOp);			
 		} catch (IOException | InterruptedException | IM4JavaException e) {
-			return false;
 		}
+		return errorConsumer.getOutput().contains("0 (0)");
 	}
 }

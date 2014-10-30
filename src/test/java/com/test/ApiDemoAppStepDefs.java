@@ -3,6 +3,7 @@ package com.test;
 import io.appium.java_client.android.AndroidDriver;
 
 import java.io.File;
+import java.io.IOException;
 
 import org.openqa.selenium.remote.CapabilityType;
 import org.testng.Assert;
@@ -14,6 +15,8 @@ import com.test.apidemo.app.screens.SecureDialogDescriptionScreen;
 import com.test.apidemo.app.screens.SecureSurfaceScreen;
 import com.test.utils.AppUtils;
 
+import cucumber.api.java.After;
+import cucumber.api.java.Before;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
@@ -26,10 +29,9 @@ public class ApiDemoAppStepDefs {
 	private AppActivityScreen appActivityScreen;
 	private SecureSurfaceScreen secureSurfaceScreen;
 	private SecureDialogDescriptionScreen secureDialogDescriptionScreen;
-
-	@Given("^I Open API demo Application in my device$")
-	public void i_Open_API_demo_Application_in_my_device() throws Throwable {
-		// Write code here that turns the phrase above into concrete actions
+	
+	@Before
+	public void setUp() throws IOException{
 		AppUtils.loadConfigProp("config_apidemo_test_app.properties");
 		testAppUtils = new AppUtils();
 		testAppUtils.setCapability(CapabilityType.BROWSER_NAME, "");
@@ -49,6 +51,12 @@ public class ApiDemoAppStepDefs {
 		testAppUtils.setCapability("appActivity", AppUtils.APP_ACTIVITY);
 		testAppUtils.setCapability("appPackage", AppUtils.BASE_PKG);
 		driver = testAppUtils.getDriver();
+	}
+
+	@Given("^I Open API demo Application in my device$")
+	public void i_Open_API_demo_Application_in_my_device() throws Throwable {
+		// Write code here that turns the phrase above into concrete actions
+		
 		homeScreen = new HomeScreen(driver);
 	}
 
@@ -121,9 +129,14 @@ public class ApiDemoAppStepDefs {
 		Assert.assertEquals(
 				secureDialogDescriptionScreen.hasShowSecureDialogButton(),
 				true, "'Show secure dialog' button is not present.");
-		Assert.assertEquals(secureDialogDescriptionScreen.validateScreen(
-				"SecureDialogDescriptionScreen.png",
-				"SecureDialogDescriptionScreen.png"), true);
+		Assert.assertEquals(
+				secureDialogDescriptionScreen.validateScreen(
+						"SecureDialogDescriptionScreen.png",
+						"SecureDialogDescriptionScreen.png"), true);
+	}
+	
+	@After
+	public void tearDown(){
 		driver.quit();
 	}
 
