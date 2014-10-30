@@ -2,14 +2,14 @@ package com.test.apidemo.app.screens;
 
 import io.appium.java_client.android.AndroidDriver;
 
-import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import org.apache.commons.io.FileUtils;
+import org.im4java.core.IM4JavaException;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.TakesScreenshot;
+
+import com.test.utils.AppUtils;
 
 public abstract class AbstractScreen {
 
@@ -29,16 +29,18 @@ public abstract class AbstractScreen {
 		}
 	}
 
-	protected void takeScreenShot(String fileName) {
+	public void grabScreenShot(String fileName) throws IOException, InterruptedException, IM4JavaException {
+		AppUtils.takeScreenShot("temp.png");
+		AppUtils.cropScreenShot("temp.png", fileName);
+	}
+
+	public boolean validateScreen(String actualImage, String expectedImage) throws FileNotFoundException {
 		// TODO Auto-generated method stub
-		File file = new File(fileName+".png");
-		File tmpFile = ((TakesScreenshot) driver)
-				.getScreenshotAs(OutputType.FILE);
-		try {
-			FileUtils.copyFile(tmpFile, file);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		return AppUtils.compareScreenShot(actualImage, expectedImage);
+	}
+	
+	public boolean compareScreenUsingMD5(String actualImage, String expectedImage) throws FileNotFoundException {
+		// TODO Auto-generated method stub
+		return AppUtils.compareMD5Hash(actualImage, expectedImage);
 	}
 }

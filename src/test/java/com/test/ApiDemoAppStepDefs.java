@@ -22,8 +22,8 @@ public class ApiDemoAppStepDefs {
 	private AppUtils testAppUtils;
 	private AndroidDriver driver;
 	private HomeScreen homeScreen;
-	private AppMenuScreen appMenuPage;
-	private AppActivityScreen appActivityPage;
+	private AppMenuScreen appMenuScreen;
+	private AppActivityScreen appActivityScreen;
 	private SecureSurfaceScreen secureSurfaceScreen;
 	private SecureDialogDescriptionScreen secureDialogDescriptionScreen;
 
@@ -55,20 +55,52 @@ public class ApiDemoAppStepDefs {
 	@When("^I click on 'App'$")
 	public void i_click_on_App() throws Throwable {
 		// Write code here that turns the phrase above into concrete actions
-		appMenuPage = homeScreen.getAppMenuPage();
+		appMenuScreen = homeScreen.getAppMenuPage();
+		appMenuScreen.grabScreenShot("ApplicationScreen.png");
+	}
+
+	@Then("^'Activity' text visible on 'Application' screen$")
+	public void activity_text_visible_on_Application_screen() throws Throwable {
+		// Write code here that turns the phrase above into concrete actions
+		// Assert.assertEquals(appMenuScreen.compareScreenUsingMD5(
+		// "ApplicationScreen.png", "ApplicationScreen.png"), true);
+		Assert.assertEquals(appMenuScreen.validateScreen(
+				"ApplicationScreen.png", "ApplicationScreen.png"), true);
 	}
 
 	@When("^I click on 'Activity'$")
 	public void i_click_on_Activity() throws Throwable {
 		// Write code here that turns the phrase above into concrete actions
-		appActivityPage = appMenuPage.getActivityPage();
+		appActivityScreen = appMenuScreen.getActivityPage();
+		appActivityScreen.grabScreenShot("AppActivityScreen.png");
+	}
+
+	@Then("^'Secure Surface' text visible on 'Activity' screen$")
+	public void secure_Surface_text_visible_on_Activity_screen()
+			throws Throwable {
+		// Write code here that turns the phrase above into concrete actions
+		// Assert.assertEquals(appActivityScreen.compareScreenUsingMD5(
+		// "AppActivityScreen.png", "AppActivityScreen.png"), true);
+		Assert.assertEquals(appActivityScreen.validateScreen(
+				"AppActivityScreen.png", "AppActivityScreen.png"), true);
 	}
 
 	@When("^I click on 'Secure Surface'$")
 	public void i_click_on_Secure_Surface() throws Throwable {
 		// Write code here that turns the phrase above into concrete actions
-		secureSurfaceScreen = appActivityPage.browseAppActivityScreen()
+		secureSurfaceScreen = appActivityScreen.browseAppActivityScreen()
 				.getSecureSurfaceScreen();
+		secureSurfaceScreen.grabScreenShot("SecureSurfaceScreen.png");
+	}
+
+	@Then("^'Secure Dialog' text visble on 'Secure Surface' screen$")
+	public void secure_Dialog_text_visble_on_Secure_Surface_screen()
+			throws Throwable {
+		// Write code here that turns the phrase above into concrete actions
+		// Assert.assertEquals(secureSurfaceScreen.compareScreenUsingMD5(
+		// "SecureSurfaceScreen.png", "SecureSurfaceScreen.png"), true);
+		Assert.assertEquals(secureSurfaceScreen.validateScreen(
+				"SecureSurfaceScreen.png", "SecureSurfaceScreen.png"), true);
 	}
 
 	@When("^I click on 'Secure Dialog'$")
@@ -76,14 +108,48 @@ public class ApiDemoAppStepDefs {
 		// Write code here that turns the phrase above into concrete actions
 		secureDialogDescriptionScreen = secureSurfaceScreen
 				.getSecureDialogDescriptionScreen();
+		secureDialogDescriptionScreen
+				.grabScreenShot("SecureDialogDescriptionScreen.png");
 	}
 
 	@Then("^'Show Secure Dialog' Button is displayed$")
 	public void show_Secure_Dialog_Button_is_displayed() throws Throwable {
 		// Write code here that turns the phrase above into concrete actions
+		// Assert.assertEquals(secureDialogDescriptionScreen
+		// .compareScreenUsingMD5("SecureDialogDescriptionScreen.png",
+		// "SecureDialogDescriptionScreen.png"), true);
 		Assert.assertEquals(
 				secureDialogDescriptionScreen.hasShowSecureDialogButton(),
 				true, "'Show secure dialog' button is not present.");
+		Assert.assertEquals(secureDialogDescriptionScreen.validateScreen(
+				"SecureDialogDescriptionScreen.png",
+				"SecureDialogDescriptionScreen.png"), true);
 		driver.quit();
 	}
+
+	// @When("^I click on 'OS'$")
+	// public void i_click_on_OS() throws Throwable {
+	// // Write code here that turns the phrase above into concrete actions
+	//
+	// }
+	//
+	// @Then("^'Rotation Vector' text visible on 'OS' screen$")
+	// public void rotation_Vector_text_visible_on_OS_screen() throws Throwable
+	// {
+	// // Write code here that turns the phrase above into concrete actions
+	//
+	// }
+	//
+	// @When("^I click on 'Rotation Vector'$")
+	// public void i_click_on_Rotation_Vector() throws Throwable {
+	// // Write code here that turns the phrase above into concrete actions
+	//
+	// }
+	//
+	// @Then("^image visible should be visible 'Rotation Vector' screen$")
+	// public void image_visible_should_be_visible_Rotation_Vector_screen()
+	// throws Throwable {
+	// // Write code here that turns the phrase above into concrete actions
+	//
+	// }
 }

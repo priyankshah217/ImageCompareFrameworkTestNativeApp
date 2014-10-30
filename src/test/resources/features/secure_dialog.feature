@@ -6,7 +6,10 @@ Given I Open API demo Application in my device
 Scenario: Secure Dialog
 
 When I click on 'App'
-	And I click on 'Activity'
-	And I click on 'Secure Surface'
-	And I click on 'Secure Dialog'
+Then 'Activity' text visible on 'Application' screen
+When I click on 'Activity'
+Then 'Secure Surface' text visible on 'Activity' screen
+When I click on 'Secure Surface'
+Then 'Secure Dialog' text visble on 'Secure Surface' screen
+When I click on 'Secure Dialog'
 Then 'Show Secure Dialog' Button is displayed
