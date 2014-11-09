@@ -1,9 +1,9 @@
 package com.test.utils;
 
 import io.appium.java_client.android.AndroidDriver;
+import io.appium.java_client.remote.MobileCapabilityType;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -35,23 +35,30 @@ public class AppUtils {
 	public static String DEVICE_NAME;
 	public static String ACTUAL_IMAGE_DIR;
 	public static String REFERENCE_IMAGE_DIR;
-	public static String ACTUAL_IMAGE_PARENT_DIR;
-	public static String REFERENCE_IMAGE_PARENT_DIR;
-	private static int SCREENSHOT_WIDTH;
-	private static int SCREENSHOT_HEIGHT;
-	private static int SCREENSHOT_X;
-	private static int SCREENSHOT_Y;
-	private DesiredCapabilities capabilities;
-	private URL serverUrl;
+	private static String ACTUAL_IMAGE_PARENT_DIR;
+	private static String REFERENCE_IMAGE_PARENT_DIR;
+	private static DesiredCapabilities capabilities;
+	private static URL serverUrl;
 	private static AndroidDriver driver;
-
-	public AppUtils() {
-		// TODO Auto-generated constructor stub
-		capabilities = new DesiredCapabilities();
-	}
+	private static String MASKED_IMAGE_PARENT_DIR;
+	private static String DIFF_IMAGE_PARENT_DIR;
+	private static String PENDING_IMAGE_PARENT_DIR;
+	public static String MASKED_IMAGE_DIR;
+	public static String DIFF_IMAGE_DIR;
+	public static String PENDING_IMAGE_DIR;
+	private static String BASE_PATH;
+	private static String AUTOMATION_INSTRUMENTATION;
+	private static String BROWSER_NAME;
+	private static String PLATFORM_NAME;
+	private static String NEW_COMMAND_TIMEOUT;
+	private static String DEVICE_READY_TIMEOUT;
+	private static String PLATFORM_VERSION;
+	private static String DEVICE_TYPE;
+	public static String APP_URL;
 
 	public static void loadConfigProp(String propertyFileName)
 			throws IOException {
+		capabilities = new DesiredCapabilities();
 		prop.load(ClassLoader.getSystemResource(propertyFileName).openStream());
 
 		EXPLICIT_WAIT_TIME = Integer
@@ -63,27 +70,64 @@ public class AppUtils {
 		BASE_PKG = prop.getProperty("base.pkg");
 		APP_ACTIVITY = prop.getProperty("application.activity");
 		APPIUM_PORT = prop.getProperty("appium.server.port");
+		AUTOMATION_INSTRUMENTATION = prop
+				.getProperty("automation.instumentation");
+		DEVICE_TYPE = prop.getProperty("device.type");
+		BROWSER_NAME = prop.getProperty("browser.name");
+		PLATFORM_NAME = prop.getProperty("platform.name");
+		PLATFORM_VERSION = prop.getProperty("platform.version");
+		NEW_COMMAND_TIMEOUT = prop.getProperty("new.command.timeout");
+		DEVICE_READY_TIMEOUT = prop.getProperty("device.ready.timeout");
 		DEVICE_NAME = prop.getProperty("device.name");
+		APP_URL = prop.getProperty("app.url");
 		ACTUAL_IMAGE_PARENT_DIR = prop.getProperty("actual.image.dir");
 		REFERENCE_IMAGE_PARENT_DIR = prop.getProperty("reference.image.dir");
-		ACTUAL_IMAGE_DIR = System.getProperty("user.dir") + "/"
-				+ ACTUAL_IMAGE_PARENT_DIR + "/" + DEVICE_NAME;
-		REFERENCE_IMAGE_DIR = System.getProperty("user.dir") + "/test-classes/"
-				+ REFERENCE_IMAGE_PARENT_DIR + "/" + DEVICE_NAME;
-		SCREENSHOT_WIDTH = Integer.parseInt(prop.getProperty(DEVICE_NAME
-				+ ".width"));
-		SCREENSHOT_HEIGHT = Integer.parseInt(prop.getProperty(DEVICE_NAME
-				+ ".height"));
-		SCREENSHOT_X = Integer.parseInt(prop.getProperty(DEVICE_NAME + ".x"));
-		SCREENSHOT_Y = Integer.parseInt(prop.getProperty(DEVICE_NAME + ".y"));
+		MASKED_IMAGE_PARENT_DIR = prop.getProperty("mask.image.dir");
+		DIFF_IMAGE_PARENT_DIR = prop.getProperty("diff.image.dir");
+		PENDING_IMAGE_PARENT_DIR = prop.getProperty("pending.image.dir");
+
+		BASE_PATH = new File(ClassLoader.getSystemResource(propertyFileName)
+				.getPath()).getParent();
+
+		ACTUAL_IMAGE_DIR = BASE_PATH + "/" + ACTUAL_IMAGE_PARENT_DIR + "/"
+				+ DEVICE_NAME;
+		REFERENCE_IMAGE_DIR = BASE_PATH + "/" + REFERENCE_IMAGE_PARENT_DIR
+				+ "/" + DEVICE_NAME;
+		MASKED_IMAGE_DIR = BASE_PATH + "/" + MASKED_IMAGE_PARENT_DIR + "/"
+				+ DEVICE_NAME;
+		DIFF_IMAGE_DIR = BASE_PATH + "/" + DIFF_IMAGE_PARENT_DIR + "/"
+				+ DEVICE_NAME;
+		PENDING_IMAGE_DIR = BASE_PATH + "/" + PENDING_IMAGE_PARENT_DIR + "/"
+				+ DEVICE_NAME;
 		createDirectory(ACTUAL_IMAGE_DIR);
+		createDirectory(DIFF_IMAGE_DIR);
 	}
 
-	public void setCapability(String capabilityName, String capabilityValue) {
-		capabilities.setCapability(capabilityName, capabilityValue);
+	public static void setCapabilities() {
+		capabilities.setCapability(MobileCapabilityType.BROWSER_NAME,
+				AppUtils.BROWSER_NAME);
+		capabilities.setCapability(MobileCapabilityType.PLATFORM_VERSION,
+				AppUtils.PLATFORM_VERSION);
+		capabilities.setCapability(MobileCapabilityType.PLATFORM_NAME,
+				AppUtils.PLATFORM_NAME);
+		capabilities.setCapability(MobileCapabilityType.DEVICE_NAME,
+				AppUtils.DEVICE_TYPE);
+		capabilities.setCapability(MobileCapabilityType.AUTOMATION_NAME,
+				AppUtils.AUTOMATION_INSTRUMENTATION);
+		capabilities.setCapability(MobileCapabilityType.APP, new File(
+				ClassLoader.getSystemResource(AppUtils.APPLICATION_NAME)
+						.getFile()).getAbsolutePath());
+		capabilities.setCapability(MobileCapabilityType.APP_ACTIVITY,
+				AppUtils.APP_ACTIVITY);
+		capabilities.setCapability(MobileCapabilityType.APP_PACKAGE,
+				AppUtils.BASE_PKG);
+		capabilities.setCapability(MobileCapabilityType.NEW_COMMAND_TIMEOUT,
+				AppUtils.NEW_COMMAND_TIMEOUT);
+		capabilities.setCapability(MobileCapabilityType.DEVICE_READY_TIMEOUT,
+				AppUtils.DEVICE_READY_TIMEOUT);
 	}
 
-	public AndroidDriver getDriver() throws MalformedURLException {
+	public static AndroidDriver getDriver() throws MalformedURLException {		
 		serverUrl = new URL("http://localhost:" + APPIUM_PORT + "/wd/hub");
 		driver = new AndroidDriver(serverUrl, capabilities);
 		driver.manage().timeouts().implicitlyWait(3, TimeUnit.SECONDS);
@@ -103,7 +147,7 @@ public class AppUtils {
 
 	public static void takeScreenShot(String fileName) {
 		// TODO Auto-generated method stub
-		File file = new File(AppUtils.ACTUAL_IMAGE_DIR + "/" + fileName);
+		File file = new File(fileName);
 		File tmpFile = ((TakesScreenshot) driver)
 				.getScreenshotAs(OutputType.FILE);
 		try {
@@ -114,19 +158,19 @@ public class AppUtils {
 		}
 	}
 
-	public static void cropScreenShot(String inputImage, String outputImage)
-			throws IOException, InterruptedException, IM4JavaException {
-		IMOperation op = new IMOperation();
-		op.addImage(ACTUAL_IMAGE_DIR + "/" + inputImage); // input
-		// image
-		op.crop(SCREENSHOT_WIDTH, SCREENSHOT_HEIGHT, SCREENSHOT_X, SCREENSHOT_Y);
-		op.addImage(ACTUAL_IMAGE_DIR + "/" + outputImage); // output
-		// image
-		ConvertCmd convert = new ConvertCmd();
-		convert.run(op);
-		File file = new File(AppUtils.ACTUAL_IMAGE_DIR + "/" + inputImage);
-		file.delete();
-	}
+	// public static void cropScreenShot(String inputImage, String outputImage)
+	// throws IOException, InterruptedException, IM4JavaException {
+	// IMOperation op = new IMOperation();
+	// op.addImage(ACTUAL_IMAGE_DIR + "/" + inputImage); // input
+	// // image
+	// op.crop(SCREENSHOT_WIDTH, SCREENSHOT_HEIGHT, SCREENSHOT_X, SCREENSHOT_Y);
+	// op.addImage(ACTUAL_IMAGE_DIR + "/" + outputImage); // output
+	// // image
+	// ConvertCmd convert = new ConvertCmd();
+	// convert.run(op);
+	// File file = new File(AppUtils.ACTUAL_IMAGE_DIR + "/" + inputImage);
+	// file.delete();
+	// }
 
 	public static boolean compareMD5Hash(String actualImage,
 			String expectedImage) {
@@ -135,21 +179,33 @@ public class AppUtils {
 						+ expectedImage)));
 	}
 
-	public static boolean compareScreenShot(String actualImage,
-			String expectedImage) throws FileNotFoundException {
+	public static void maskImage(String actualImage, String maskImage,
+			String maskedImage) throws IOException, InterruptedException,
+			IM4JavaException {
+		IMOperation op = new IMOperation();
+		op.addImage(actualImage);
+		op.addImage(maskImage);
+		op.alpha("on");
+		op.compose("DstOut");
+		op.composite();
+		op.addImage(maskedImage);
+		ConvertCmd convert = new ConvertCmd();
+		convert.run(op);
+	}
+
+	public static boolean compareImages(String actualImage,
+			String expectedImage, String diffImage) throws IOException,
+			InterruptedException, IM4JavaException {
 		CompareCmd compare = new CompareCmd();
 		ArrayListErrorConsumer errorConsumer = new ArrayListErrorConsumer();
-		compare.setErrorConsumer(errorConsumer); // for // metric-output
+		compare.setErrorConsumer(errorConsumer); // for metric-output
 		IMOperation cmpOp = new IMOperation();
-		cmpOp.addImage(ACTUAL_IMAGE_DIR + "/" + actualImage);
-		cmpOp.addImage(REFERENCE_IMAGE_DIR + "/" + expectedImage);
+		cmpOp.addImage();
+		cmpOp.addImage();
 		cmpOp.metric("RMSE"); // root mean squared (normalized root mean
 								// squared)
-		cmpOp.addImage();
-		try {
-			compare.run(cmpOp);			
-		} catch (IOException | InterruptedException | IM4JavaException e) {
-		}
+		cmpOp.addImage();		
+		compare.run(cmpOp, actualImage, expectedImage, diffImage);
 		return errorConsumer.getOutput().contains("0 (0)");
 	}
 }
