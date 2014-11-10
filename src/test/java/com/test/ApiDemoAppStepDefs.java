@@ -4,17 +4,19 @@ import io.appium.java_client.android.AndroidDriver;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 
-import org.openqa.selenium.remote.CapabilityType;
-import org.testng.Assert;
+import org.im4java.core.IM4JavaException;
+import org.junit.Assert;
 
-import com.test.apidemo.app.screens.AppActivityScreen;
-import com.test.apidemo.app.screens.AppMenuScreen;
+import com.test.apidemo.app.screens.ActivityScreen;
+import com.test.apidemo.app.screens.AppScreen;
+import com.test.apidemo.app.screens.HelloWorldScreen;
 import com.test.apidemo.app.screens.HomeScreen;
-import com.test.apidemo.app.screens.SecureDialogDescriptionScreen;
-import com.test.apidemo.app.screens.SecureSurfaceScreen;
+import com.test.utils.AbstractScreen;
 import com.test.utils.AppUtils;
 
+import cucumber.api.Scenario;
 import cucumber.api.java.After;
 import cucumber.api.java.Before;
 import cucumber.api.java.en.Given;
@@ -22,147 +24,94 @@ import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 
 public class ApiDemoAppStepDefs {
-	private AppUtils testAppUtils;
 	private AndroidDriver driver;
 	private HomeScreen homeScreen;
-	private AppMenuScreen appMenuScreen;
-	private AppActivityScreen appActivityScreen;
-	private SecureSurfaceScreen secureSurfaceScreen;
-	private SecureDialogDescriptionScreen secureDialogDescriptionScreen;
-	
+	private AppScreen appScreen;
+	private ActivityScreen activityScreen;
+	private HelloWorldScreen helloworldScreen;
+	private Scenario scenario;
+	private AbstractScreen screen;
+	private String diffImage;
+
 	@Before
-	public void setUp() throws IOException{
+	public void Setup(Scenario scenario) throws IOException {
+		this.scenario = scenario;
 		AppUtils.loadConfigProp("config_apidemo_test_app.properties");
-		testAppUtils = new AppUtils();
-		testAppUtils.setCapability(CapabilityType.BROWSER_NAME, "");
-		testAppUtils.setCapability("platformVersion", "4.4.2");
-		testAppUtils.setCapability("appium-version", "1.2.2");
-		testAppUtils.setCapability("platformName", "Android");
-		testAppUtils.setCapability("deviceName", "Android");
-		testAppUtils.setCapability("automationName", "Appium");
-		testAppUtils
-				.setCapability(
-						"app",
-						new File(ClassLoader.getSystemResource(
-								AppUtils.APPLICATION_NAME).getFile())
-								.getAbsolutePath());
-		testAppUtils.setCapability("newCommandTimeout", "3600");
-		testAppUtils.setCapability("deviceReadyTimeout", "3600");
-		testAppUtils.setCapability("appActivity", AppUtils.APP_ACTIVITY);
-		testAppUtils.setCapability("appPackage", AppUtils.BASE_PKG);
-		driver = testAppUtils.getDriver();
+		AppUtils.setCapabilities();
+		driver = AppUtils.getDriver();
 	}
 
-	@Given("^I Open API demo Application in my device$")
-	public void i_Open_API_demo_Application_in_my_device() throws Throwable {
+	@Given("^I open \"(.*?)\" application in my device$")
+	public void i_open_application_in_my_device(String arg1) throws Throwable {
 		// Write code here that turns the phrase above into concrete actions
-		
 		homeScreen = new HomeScreen(driver);
 	}
 
-	@When("^I click on 'App'$")
-	public void i_click_on_App() throws Throwable {
+	@Then("^I take a screenshot of \"(.*?)\" screen$")
+	public void i_take_a_screenshot_of_screen(String screenName)
+			throws IOException, InterruptedException, IM4JavaException {
 		// Write code here that turns the phrase above into concrete actions
-		appMenuScreen = homeScreen.getAppMenuPage();
-		appMenuScreen.grabScreenShot("ApplicationScreen.png");
+		switch (screenName) {
+		case "Home Screen":
+			screen = homeScreen;
+			break;
+		case "App":
+			screen = appScreen;
+			break;
+		case "Activity":
+			screen = activityScreen;
+			break;
+		case "Hello World":
+			screen = helloworldScreen;
+			break;
+		}
+		String screenshotName = screen.getScreenName() + ".png";
+		String actualImage = AppUtils.ACTUAL_IMAGE_DIR + "/" + screenshotName;
+		String maskImage = AppUtils.MASKED_IMAGE_DIR + "/" + screenshotName;
+		String referenceImage = AppUtils.REFERENCE_IMAGE_DIR + "/"
+				+ screenshotName;
+		File maskImageFile = new File(maskImage);
+		AppUtils.takeScreenShot(actualImage);
+		if (maskImageFile.exists()) {
+			String maskedActualImage = AppUtils.DIFF_IMAGE_DIR + "/"
+					+ "MaskedActual" + screenshotName;
+			String maskedReferenceImage = AppUtils.DIFF_IMAGE_DIR + "/"
+					+ "MaskedReference" + screenshotName;
+			AppUtils.maskImage(actualImage, maskImage, maskedActualImage);
+			AppUtils.maskImage(referenceImage, maskImage, maskedReferenceImage);
+			actualImage = maskedActualImage;
+			referenceImage = maskedReferenceImage;
+
+		}
+		diffImage = AppUtils.DIFF_IMAGE_DIR + "/" + "Diff" + screenshotName;
+		Assert.assertSame(true,
+				AppUtils.compareImages(actualImage, referenceImage, diffImage));
 	}
 
-	@Then("^'Activity' text visible on 'Application' screen$")
-	public void activity_text_visible_on_Application_screen() throws Throwable {
+	@When("^I click on \"(.*?)\"$")
+	public void i_click_on(String elementName) throws Throwable {
 		// Write code here that turns the phrase above into concrete actions
-		// Assert.assertEquals(appMenuScreen.compareScreenUsingMD5(
-		// "ApplicationScreen.png", "ApplicationScreen.png"), true);
-		Assert.assertEquals(appMenuScreen.validateScreen(
-				"ApplicationScreen.png", "ApplicationScreen.png"), true);
+		switch (elementName) {
+		case "App":
+			appScreen = homeScreen.getAppScreen();
+			break;
+		case "Activity":
+			activityScreen = appScreen.getActivityPage();
+			break;
+		case "Hello World":
+			helloworldScreen = activityScreen.getHelloWorldScreen();
+			break;
+		}
 	}
 
-	@When("^I click on 'Activity'$")
-	public void i_click_on_Activity() throws Throwable {
-		// Write code here that turns the phrase above into concrete actions
-		appActivityScreen = appMenuScreen.getActivityPage();
-		appActivityScreen.grabScreenShot("AppActivityScreen.png");
-	}
-
-	@Then("^'Secure Surface' text visible on 'Activity' screen$")
-	public void secure_Surface_text_visible_on_Activity_screen()
-			throws Throwable {
-		// Write code here that turns the phrase above into concrete actions
-		// Assert.assertEquals(appActivityScreen.compareScreenUsingMD5(
-		// "AppActivityScreen.png", "AppActivityScreen.png"), true);
-		Assert.assertEquals(appActivityScreen.validateScreen(
-				"AppActivityScreen.png", "AppActivityScreen.png"), true);
-	}
-
-	@When("^I click on 'Secure Surface'$")
-	public void i_click_on_Secure_Surface() throws Throwable {
-		// Write code here that turns the phrase above into concrete actions
-		secureSurfaceScreen = appActivityScreen.browseAppActivityScreen()
-				.getSecureSurfaceScreen();
-		secureSurfaceScreen.grabScreenShot("SecureSurfaceScreen.png");
-	}
-
-	@Then("^'Secure Dialog' text visble on 'Secure Surface' screen$")
-	public void secure_Dialog_text_visble_on_Secure_Surface_screen()
-			throws Throwable {
-		// Write code here that turns the phrase above into concrete actions
-		// Assert.assertEquals(secureSurfaceScreen.compareScreenUsingMD5(
-		// "SecureSurfaceScreen.png", "SecureSurfaceScreen.png"), true);
-		Assert.assertEquals(secureSurfaceScreen.validateScreen(
-				"SecureSurfaceScreen.png", "SecureSurfaceScreen.png"), true);
-	}
-
-	@When("^I click on 'Secure Dialog'$")
-	public void i_click_on_Secure_Dialog() throws Throwable {
-		// Write code here that turns the phrase above into concrete actions
-		secureDialogDescriptionScreen = secureSurfaceScreen
-				.getSecureDialogDescriptionScreen();
-		secureDialogDescriptionScreen
-				.grabScreenShot("SecureDialogDescriptionScreen.png");
-	}
-
-	@Then("^'Show Secure Dialog' Button is displayed$")
-	public void show_Secure_Dialog_Button_is_displayed() throws Throwable {
-		// Write code here that turns the phrase above into concrete actions
-		// Assert.assertEquals(secureDialogDescriptionScreen
-		// .compareScreenUsingMD5("SecureDialogDescriptionScreen.png",
-		// "SecureDialogDescriptionScreen.png"), true);
-		Assert.assertEquals(
-				secureDialogDescriptionScreen.hasShowSecureDialogButton(),
-				true, "'Show secure dialog' button is not present.");
-		Assert.assertEquals(
-				secureDialogDescriptionScreen.validateScreen(
-						"SecureDialogDescriptionScreen.png",
-						"SecureDialogDescriptionScreen.png"), true);
-	}
-	
 	@After
-	public void tearDown(){
+	public void tearDown() throws IOException {
+		if (this.scenario.isFailed()) {
+			byte[] fileContent = Files.readAllBytes(new File(diffImage)
+					.toPath());
+			this.scenario.embed(fileContent, "image/png");
+			this.scenario.write("Image Comparision Failed");
+		}
 		driver.quit();
 	}
-
-	// @When("^I click on 'OS'$")
-	// public void i_click_on_OS() throws Throwable {
-	// // Write code here that turns the phrase above into concrete actions
-	//
-	// }
-	//
-	// @Then("^'Rotation Vector' text visible on 'OS' screen$")
-	// public void rotation_Vector_text_visible_on_OS_screen() throws Throwable
-	// {
-	// // Write code here that turns the phrase above into concrete actions
-	//
-	// }
-	//
-	// @When("^I click on 'Rotation Vector'$")
-	// public void i_click_on_Rotation_Vector() throws Throwable {
-	// // Write code here that turns the phrase above into concrete actions
-	//
-	// }
-	//
-	// @Then("^image visible should be visible 'Rotation Vector' screen$")
-	// public void image_visible_should_be_visible_Rotation_Vector_screen()
-	// throws Throwable {
-	// // Write code here that turns the phrase above into concrete actions
-	//
-	// }
 }

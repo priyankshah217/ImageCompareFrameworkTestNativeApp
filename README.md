@@ -21,6 +21,10 @@ sudo apt-get install imagemagick --fix-missing )
 			<version>1.4.0</version>
 		</dependency>
 	)
+7. All reference images should and be stored at /src/test/resources/reference-images/<device-names>
+	reference images should be saved with specific naming conventions.(e.g APIDemosHomeScreen.png,GitHubAppiumHomeScreen.png)
+8. All image masks should and be stored at /src/test/resources/mask-images/<device-names>
+	image mask should be saved with specific naming conventions.(e.g APIDemosHomeScreen.png,GitHubAppiumHomeScreen.png, mask images with transparent background has been created using gimp tool)
 
 Configuration and Settings
 =====================
@@ -71,6 +75,11 @@ Procedure to run test
 =====================
 1. Start appium server
 2. run automation from project directory using mvn clean test
+
+Image Verification
+=====================
+1. Image mask will be applied to reference images and actual images (alpha on and RMSE algorithm have been used for image comparison), the masked actual and reference images should be match.
+2. Image verification used underlying imagemagik API, hence any discrepancies in image size and pixel resolution throws error
 
 
 Known issues and limitations 
